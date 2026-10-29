@@ -1,5 +1,9 @@
 use super::set_focused_descendant;
-use crate::{models::Container, traits::CommonGetters, wm_state::WmState};
+use crate::{
+  models::{Container, SplitContainer},
+  traits::CommonGetters,
+  wm_state::WmState,
+};
 
 /// Tab to switch to relative to the active tab.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -18,7 +22,7 @@ pub fn focus_tab(
   container: &Container,
   target: TabTarget,
   state: &mut WmState,
-) -> anyhow::Result<()> {
+) {
   // Find the closest tabbed ancestor, and its child that contains the
   // given container (i.e. the current tab).
   let Some((stack, current_tab)) =
@@ -26,11 +30,11 @@ pub fn focus_tab(
       ancestor
         .parent()
         .and_then(|parent| parent.as_split().cloned())
-        .filter(|split| split.is_tabbed())
+        .filter(SplitContainer::is_tabbed)
         .map(|split| (split, ancestor))
     })
   else {
-    return Ok(());
+    return;
   };
 
   let tabs = stack.tiling_children().collect::<Vec<_>>();
@@ -38,7 +42,7 @@ pub fn focus_tab(
   let Some(current_index) =
     tabs.iter().position(|tab| tab.id() == current_tab.id())
   else {
-    return Ok(());
+    return;
   };
 
   let target_index = match target {
@@ -55,6 +59,4 @@ pub fn focus_tab(
 
   set_focused_descendant(&focus_target, None);
   state.pending_sync.queue_focus_change();
-
-  Ok(())
 }

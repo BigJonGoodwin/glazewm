@@ -38,7 +38,8 @@ pub fn toggle_tabbed(
       split_container
     }
     DirectionContainer::Workspace(workspace) => {
-      let tiling_children = workspace.tiling_children().collect::<Vec<_>>();
+      let tiling_children =
+        workspace.tiling_children().collect::<Vec<_>>();
 
       // A single window cannot be stacked.
       if tiling_children.len() < 2 {

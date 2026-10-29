@@ -3,8 +3,8 @@ use wm_common::{GapsConfig, TilingDirection, TilingLayout, WmEvent};
 use wm_platform::Direction;
 
 use super::{
-  move_container_within_tree, set_focused_descendant,
-  tiling_focus_target, wrap_in_split_container,
+  move_container_within_tree, set_focused_descendant, tiling_focus_target,
+  wrap_in_split_container,
 };
 use crate::{
   models::{Container, SplitContainer},
@@ -43,26 +43,25 @@ pub fn stack_in_direction(
 
   let is_new_stack = existing_stack.is_none();
 
-  let stack = match existing_stack {
-    Some(stack) => stack,
-    None => {
-      // Tab order follows the direction the windows were laid out in, so
-      // that unstacking restores a similar layout.
-      let stack = SplitContainer::new(
-        TilingDirection::from_direction(direction),
-        gaps_config.clone(),
-      );
+  let stack = if let Some(stack) = existing_stack {
+    stack
+  } else {
+    // Tab order follows the direction the windows were laid out in, so
+    // that unstacking restores a similar layout.
+    let stack = SplitContainer::new(
+      TilingDirection::from_direction(direction),
+      gaps_config.clone(),
+    );
 
-      stack.set_tiling_layout(TilingLayout::Tabbed);
+    stack.set_tiling_layout(TilingLayout::Tabbed);
 
-      wrap_in_split_container(
-        &stack,
-        &target_parent,
-        &[target.as_tiling_container()?],
-      )?;
+    wrap_in_split_container(
+      &stack,
+      &target_parent,
+      &[target.as_tiling_container()?],
+    )?;
 
-      stack
-    }
+    stack
   };
 
   let target_index = match direction {

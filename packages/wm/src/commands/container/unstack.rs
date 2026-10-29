@@ -4,7 +4,11 @@ use super::{
   flatten_child_split_containers, move_container_within_tree,
   set_focused_descendant,
 };
-use crate::{models::Container, traits::CommonGetters, wm_state::WmState};
+use crate::{
+  models::{Container, SplitContainer},
+  traits::CommonGetters,
+  wm_state::WmState,
+};
 
 /// Moves a tiling window out of its tabbed split container, placing it
 /// right after the container in the container's parent.
@@ -18,7 +22,7 @@ pub fn unstack(
   let Some(stack) = container
     .parent()
     .and_then(|parent| parent.as_split().cloned())
-    .filter(|split| split.is_tabbed())
+    .filter(SplitContainer::is_tabbed)
   else {
     return Ok(());
   };

@@ -10,6 +10,8 @@ mod replace_container;
 mod resize_tiling_container;
 mod set_focused_descendant;
 mod stack_in_direction;
+#[cfg(test)]
+mod tabbed_tests;
 mod toggle_tabbed;
 mod toggle_tiling_direction;
 mod unstack;

@@ -61,7 +61,8 @@ pub fn emit_tabbed_containers_changed(
 
   if state.tabbed_containers_snapshot != snapshot {
     state.tabbed_containers_snapshot = snapshot;
-    state.emit_event(WmEvent::TabbedContainersChanged { tabbed_containers });
+    state
+      .emit_event(WmEvent::TabbedContainersChanged { tabbed_containers });
   }
 
   Ok(())

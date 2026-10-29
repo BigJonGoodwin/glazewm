@@ -40,8 +40,12 @@ pub fn flatten_child_split_containers(
         if split_child.is_tabbed() || is_tabbed(&parent) {
           flatten_only_child_with_layout(&parent, split_child)?;
         } else {
+          // Take over the child's direction. This is usually the inverse
+          // of the parent's, but not after untabbing (e.g. H[T(h)[1 2]]
+          // -> H[H[1 2]] -> H[1 2]).
+          let tiling_direction = split_child.tiling_direction();
           flatten_split_container(split_child.clone())?;
-          parent.set_tiling_direction(parent.tiling_direction().inverse());
+          parent.set_tiling_direction(tiling_direction);
         }
       }
     } else {

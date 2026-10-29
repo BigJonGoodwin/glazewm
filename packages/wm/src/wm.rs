@@ -330,11 +330,11 @@ impl WindowManager {
         }
 
         if args.next_tab {
-          focus_tab(&subject_container, TabTarget::Next, state)?;
+          focus_tab(&subject_container, TabTarget::Next, state);
         }
 
         if args.prev_tab {
-          focus_tab(&subject_container, TabTarget::Previous, state)?;
+          focus_tab(&subject_container, TabTarget::Previous, state);
         }
 
         Ok(())

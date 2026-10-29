@@ -6,6 +6,7 @@ use crate::{
   commands::{
     general::emit_tabbed_containers_changed, window::run_window_rules,
   },
+  models::SplitContainer,
   traits::{CommonGetters, WindowGetters},
   user_config::UserConfig,
   wm_state::WmState,
@@ -29,7 +30,7 @@ pub fn handle_window_title_changed(
 
     // Tab titles are part of the tabbed containers event.
     if window.ancestors().any(|ancestor| {
-      ancestor.as_split().is_some_and(|split| split.is_tabbed())
+      ancestor.as_split().is_some_and(SplitContainer::is_tabbed)
     }) {
       emit_tabbed_containers_changed(state)?;
     }

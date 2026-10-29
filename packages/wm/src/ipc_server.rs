@@ -16,8 +16,8 @@ use wm_common::{
   ClientResponseMessage, CommandData, EventSubscribeData,
   EventSubscriptionMessage, FocusedData, MonitorsData, QueryCommand,
   ServerMessage, SubscribableEvent, TabbedContainersData,
-  TilingDirectionData, WindowsData,
-  WmEvent, WorkspacesData, DEFAULT_IPC_PORT,
+  TilingDirectionData, WindowsData, WmEvent, WorkspacesData,
+  DEFAULT_IPC_PORT,
 };
 
 use crate::{
