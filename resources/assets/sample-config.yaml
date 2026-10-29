@@ -54,6 +54,10 @@ gaps:
     bottom: '20px'
     left: '20px'
 
+  # Height reserved above the tabs of a tabbed container, e.g. for a tab
+  # strip drawn by an external app.
+  tab_bar_height: '0px'
+
 window_effects:
   # Visual effects to apply to the focused window.
   focused_window:

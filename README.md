@@ -354,6 +354,68 @@ binding_modes:
         bindings: ["escape", "enter"]
 ```
 
+## Stacked tabs (deskhud fork)
+
+This fork adds a **tabbed layout** for split containers (like i3's tabbed mode or komorebi's stacks). All windows of a tabbed container share its rectangle. Only the active tab is shown; the other tabs are hidden the same way as windows on hidden workspaces (cloaked by default). The active tab is always the most recently focused child, so focusing a window inside a stack (by keybinding, mouse, alt-tab or `focus --container-id`) makes it the active tab.
+
+Without a tabbed container, GlazeWM behaves exactly as upstream.
+
+### Commands
+
+| Command | Effect |
+| --- | --- |
+| `toggle-tabbed` | One-button stack/unstack. Tabs the focused window's parent split container, or tiles it again (keeping its tiling direction). On a window directly in the workspace, wraps all the workspace's tiling windows in a new tabbed container. |
+| `stack --direction <left\|right\|up\|down>` | Moves the focused window into the window in that direction, creating a tabbed container or joining an existing one. The moved window becomes the active tab. |
+| `unstack` | Moves the focused window out of its tabbed container, right after it. A tabbed container left with one window is dissolved. |
+| `focus --next-tab` / `focus --prev-tab` | Switches to the next/previous tab of the closest tabbed container (wraps around). |
+
+Existing commands keep working inside stacks:
+
+- `focus --direction` / `move --direction` along a stack's tiling direction step through or reorder the tabs; at the last tab (or in the other direction) they leave the stack. Entering a stack from outside lands on its active tab.
+- Closing, minimizing or floating the active tab moves it out of the stack and shows the most recently focused remaining tab. `set-tiling` puts a window back like any tiling window.
+- Resizing a tab resizes the whole tabbed container.
+
+### Example keybindings
+
+```yaml
+keybindings:
+  - commands: ["toggle-tabbed"]
+    bindings: ["alt+t"]
+  - commands: ["stack --direction left"]
+    bindings: ["alt+ctrl+h", "alt+ctrl+left"]
+  - commands: ["stack --direction right"]
+    bindings: ["alt+ctrl+l", "alt+ctrl+right"]
+  - commands: ["stack --direction up"]
+    bindings: ["alt+ctrl+k", "alt+ctrl+up"]
+  - commands: ["stack --direction down"]
+    bindings: ["alt+ctrl+j", "alt+ctrl+down"]
+  - commands: ["unstack"]
+    bindings: ["alt+ctrl+backspace"]
+  - commands: ["focus --prev-tab"]
+    bindings: ["alt+oem_open_brackets"]
+  - commands: ["focus --next-tab"]
+    bindings: ["alt+oem_close_brackets"]
+```
+
+### Space for a tab strip
+
+GlazeWM doesn't draw tabs itself. An external app (e.g. deskhud) can draw a tab strip along the top of each tabbed container. Reserve room for it so the strip doesn't cover the active window:
+
+```yaml
+gaps:
+  # Height reserved above the tabs of a tabbed container (default: 0px).
+  tab_bar_height: "26px"
+```
+
+The tabbed container's own `x`/`y`/`width`/`height` stay unchanged (that is where the strip goes); its windows are placed below the reserved band.
+
+### IPC
+
+- Split containers have `"layout": "tiled" | "tabbed"` and `"activeChildId"` (the active tab's ID, `null` when tiled), next to the existing `tilingDirection`.
+- `glazewm query tabbed-containers` lists all tabbed containers on displayed workspaces.
+- `tabbed_containers_changed` (`{ "tabbedContainers": [...] }`) is emitted whenever that list changes: a stack is created, dissolved, shown or hidden with its workspace, or its active tab, windows, titles or position change. It always carries the full list, so a client can redraw every tab strip from one event.
+- `tiling_layout_changed` (`{ "splitContainer": {...}, "newLayout": "tabbed" }`) is emitted by `toggle-tabbed` and when `stack` creates a new stack.
+
 ## FAQ
 
 **Q: How do I run GlazeWM on startup?**
