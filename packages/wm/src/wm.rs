@@ -17,8 +17,9 @@ use wm_platform::{
 use crate::{
   commands::{
     container::{
-      focus_container_by_id, focus_in_direction, set_tiling_direction,
-      toggle_tiling_direction,
+      focus_container_by_id, focus_in_direction, focus_tab,
+      set_tiling_direction, stack_in_direction, toggle_tabbed,
+      toggle_tiling_direction, unstack, TabTarget,
     },
     general::{
       cycle_focus, disable_binding_mode, enable_binding_mode,
@@ -326,6 +327,14 @@ impl WindowManager {
             state,
             config,
           )?;
+        }
+
+        if args.next_tab {
+          focus_tab(&subject_container, TabTarget::Next, state)?;
+        }
+
+        if args.prev_tab {
+          focus_tab(&subject_container, TabTarget::Previous, state)?;
         }
 
         Ok(())
@@ -743,6 +752,16 @@ impl WindowManager {
           tiling_direction,
         )
       }
+      InvokeCommand::Stack { direction } => stack_in_direction(
+        &subject_container,
+        direction,
+        state,
+        &config.value.gaps,
+      ),
+      InvokeCommand::ToggleTabbed => {
+        toggle_tabbed(&subject_container, state, &config.value.gaps)
+      }
+      InvokeCommand::Unstack => unstack(&subject_container, state),
       InvokeCommand::WmCycleFocus {
         omit_floating,
         omit_fullscreen,

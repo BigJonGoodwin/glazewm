@@ -34,6 +34,7 @@ pub enum ClientResponseData {
   TilingDirection(TilingDirectionData),
   Windows(WindowsData),
   Workspaces(WorkspacesData),
+  TabbedContainers(TabbedContainersData),
   Paused(bool),
 }
 
@@ -78,6 +79,12 @@ pub struct MonitorsData {
 pub struct TilingDirectionData {
   pub tiling_direction: TilingDirection,
   pub direction_container: ContainerDto,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TabbedContainersData {
+  pub tabbed_containers: Vec<ContainerDto>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

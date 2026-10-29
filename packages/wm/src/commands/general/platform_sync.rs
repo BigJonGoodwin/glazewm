@@ -11,6 +11,7 @@ use wm_platform::NativeWindowWindowsExt;
 use wm_platform::{CornerStyle, OpacityValue};
 use wm_platform::{Rect, WindowZOrder};
 
+use super::{emit_tabbed_containers_changed, queue_active_tab_redraws};
 use crate::{
   models::{Container, WindowContainer},
   traits::{CommonGetters, PositionGetters, WindowGetters},
@@ -24,6 +25,8 @@ pub fn platform_sync(
 ) -> anyhow::Result<()> {
   let focused_container =
     state.focused_container().context("No focused container.")?;
+
+  queue_active_tab_redraws(state);
 
   if state.pending_sync.needs_focus_update() {
     sync_focus(&focused_container, state)?;
@@ -74,6 +77,8 @@ pub fn platform_sync(
   }
 
   state.pending_sync.clear();
+
+  emit_tabbed_containers_changed(state)?;
 
   Ok(())
 }
@@ -267,9 +272,13 @@ fn redraw_containers(
     }
 
     // Transition display state depending on whether window will be
-    // shown or hidden.
+    // shown or hidden. Inactive tabs are hidden the same way as windows
+    // on hidden workspaces.
+    let should_display =
+      workspace.is_displayed() && !window.is_in_inactive_tab();
+
     window.set_display_state(
-      match (window.display_state(), workspace.is_displayed()) {
+      match (window.display_state(), should_display) {
         (DisplayState::Hidden | DisplayState::Hiding, true) => {
           DisplayState::Showing
         }

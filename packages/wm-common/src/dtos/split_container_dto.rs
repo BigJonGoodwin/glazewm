@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::ContainerDto;
-use crate::TilingDirection;
+use crate::{TilingDirection, TilingLayout};
 
 /// User-friendly representation of a split container.
 ///
@@ -21,4 +21,10 @@ pub struct SplitContainerDto {
   pub x: i32,
   pub y: i32,
   pub tiling_direction: TilingDirection,
+  /// Whether children are tiled side-by-side or shown as tabs.
+  pub layout: TilingLayout,
+  /// ID of the child that is shown when `layout` is `tabbed`.
+  ///
+  /// Always `None` for tiled split containers.
+  pub active_child_id: Option<Uuid>,
 }

@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::{
   dtos::ContainerDto,
   parsed_config::{BindingModeConfig, ParsedConfig},
-  TilingDirection,
+  TilingDirection, TilingLayout,
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -37,6 +37,20 @@ pub enum WmEvent {
   TilingDirectionChanged {
     direction_container: ContainerDto,
     new_tiling_direction: TilingDirection,
+  },
+  /// Emitted when a split container switches between tiled and tabbed.
+  TilingLayoutChanged {
+    split_container: ContainerDto,
+    new_layout: TilingLayout,
+  },
+  /// Emitted when the set of tabbed containers on displayed workspaces
+  /// changes, or when any of them changes (active tab, children, titles,
+  /// position).
+  ///
+  /// Always contains the full list, so that clients can redraw all tab
+  /// strips from a single event.
+  TabbedContainersChanged {
+    tabbed_containers: Vec<ContainerDto>,
   },
   UserConfigChanged {
     config_path: String,

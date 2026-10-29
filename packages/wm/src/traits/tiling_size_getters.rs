@@ -41,12 +41,40 @@ pub trait TilingSizeGetters: CommonGetters {
     ))
   }
 
+  /// Gets the height in pixels reserved above the tabs of a tabbed split
+  /// container (`gaps.tab_bar_height`).
+  fn tab_bar_height(&self) -> anyhow::Result<i32> {
+    let monitor = self.monitor().context("No monitor.")?;
+    let monitor_rect = monitor.native_properties().bounds;
+    let gaps_config = self.gaps_config();
+
+    let scale_factor = if gaps_config.scale_with_dpi {
+      monitor.native_properties().scale_factor
+    } else {
+      1.
+    };
+
+    Ok(
+      gaps_config
+        .tab_bar_height
+        .to_px(monitor_rect.height(), Some(scale_factor)),
+    )
+  }
+
   /// Gets the container to resize when resizing a tiling window.
   fn container_to_resize(
     &self,
     is_width_resize: bool,
   ) -> anyhow::Result<Option<TilingContainer>> {
     let parent = self.direction_container().context("No parent.")?;
+
+    // Tabs fill their tabbed container, so resizing a tab resizes the
+    // tabbed container instead.
+    if let DirectionContainer::Split(split_parent) = &parent {
+      if split_parent.is_tabbed() {
+        return split_parent.container_to_resize(is_width_resize);
+      }
+    }
 
     let tiling_direction = parent.tiling_direction();
 

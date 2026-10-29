@@ -220,6 +220,18 @@ pub trait CommonGetters {
     }
   }
 
+  /// Whether this container is hidden because it (or one of its
+  /// ancestors) is an inactive tab of a tabbed split container.
+  fn is_in_inactive_tab(&self) -> bool {
+    self.self_and_ancestors().any(|container| {
+      container
+        .parent()
+        .and_then(|parent| parent.as_split().cloned())
+        .and_then(|split| split.active_tab())
+        .is_some_and(|active_tab| active_tab.id() != container.id())
+    })
+  }
+
   /// Workspace that this container belongs to.
   ///
   /// Note that this might return the container itself.

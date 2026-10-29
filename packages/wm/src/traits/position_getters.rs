@@ -23,6 +23,20 @@ macro_rules! impl_position_getters_as_resizable {
 
         let parent_rect = parent.to_rect()?;
 
+        // Children of a tabbed container all fill the container's rect,
+        // below the space reserved for a tab bar.
+        if parent.tiling_layout() == wm_common::TilingLayout::Tabbed {
+          let tab_bar_height =
+            self.tab_bar_height()?.clamp(0, parent_rect.height());
+
+          return Ok(Rect::from_xy(
+            parent_rect.x(),
+            parent_rect.y() + tab_bar_height,
+            parent_rect.width(),
+            parent_rect.height() - tab_bar_height,
+          ));
+        }
+
         let (horizontal_gap, vertical_gap) = self.inner_gaps()?;
         let inner_gap = match parent.tiling_direction() {
           TilingDirection::Vertical => vertical_gap,

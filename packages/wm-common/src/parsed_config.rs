@@ -49,6 +49,11 @@ pub struct GapsConfig {
   /// Gap between window and the screen edge if there is only one window
   /// in the workspace
   pub single_window_outer_gap: Option<RectDelta>,
+
+  /// Space reserved above the tabs of a tabbed split container (e.g. for
+  /// a tab strip drawn by an external app). The split container's own
+  /// rect is unchanged; only its children are inset from the top.
+  pub tab_bar_height: LengthValue,
 }
 
 impl Default for GapsConfig {
@@ -63,6 +68,7 @@ impl Default for GapsConfig {
         LengthValue::from_px(0),
       ),
       single_window_outer_gap: None,
+      tab_bar_height: LengthValue::from_px(0),
     }
   }
 }

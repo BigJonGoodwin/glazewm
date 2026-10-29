@@ -1,5 +1,5 @@
 use ambassador::delegatable_trait;
-use wm_common::TilingDirection;
+use wm_common::{TilingDirection, TilingLayout};
 use wm_platform::Direction;
 
 use super::CommonGetters;
@@ -10,6 +10,12 @@ pub trait TilingDirectionGetters: CommonGetters {
   fn tiling_direction(&self) -> TilingDirection;
 
   fn set_tiling_direction(&self, tiling_direction: TilingDirection);
+
+  /// Layout of the container's children. Only split containers can be
+  /// tabbed.
+  fn tiling_layout(&self) -> wm_common::TilingLayout {
+    TilingLayout::Tiled
+  }
 
   /// Traverses down a container in search of a descendant in the given
   /// direction. For example, for `Direction::Right`, get the right-most
@@ -36,9 +42,11 @@ pub trait TilingDirectionGetters: CommonGetters {
     direction: &Direction,
   ) -> Option<TilingContainer> {
     // When the tiling direction is the inverse of the direction, return
-    // the last focused tiling child.
-    if self.tiling_direction()
-      != TilingDirection::from_direction(direction)
+    // the last focused tiling child. Tabbed containers always return their
+    // active tab (i.e. the last focused tiling child).
+    if self.tiling_layout() == TilingLayout::Tabbed
+      || self.tiling_direction()
+        != TilingDirection::from_direction(direction)
     {
       return self
         .child_focus_order()

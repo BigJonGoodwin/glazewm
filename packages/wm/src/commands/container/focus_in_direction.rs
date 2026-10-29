@@ -79,7 +79,10 @@ fn floating_focus_target(
 
 /// Gets a focus target within the current workspace. Traverse upwards from
 /// the origin container to find an adjacent container that can be focused.
-fn tiling_focus_target(
+///
+/// Returns the tiling window to focus. When the adjacent container is a
+/// tabbed split container, this is its active tab.
+pub fn tiling_focus_target(
   origin_container: &Container,
   direction: &Direction,
 ) -> anyhow::Result<Option<Container>> {

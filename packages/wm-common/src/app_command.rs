@@ -130,6 +130,8 @@ pub enum QueryCommand {
   Workspaces,
   /// Outputs whether the window manager is paused.
   Paused,
+  /// Outputs all tabbed split containers on displayed workspaces.
+  TabbedContainers,
 }
 
 #[derive(Clone, Debug, PartialEq, ValueEnum)]
@@ -144,6 +146,8 @@ pub enum SubscribableEvent {
   MonitorUpdated,
   MonitorRemoved,
   TilingDirectionChanged,
+  TilingLayoutChanged,
+  TabbedContainersChanged,
   UserConfigChanged,
   WindowManaged,
   WindowUnmanaged,
@@ -235,6 +239,18 @@ pub enum InvokeCommand {
     #[clap(required = true)]
     tiling_direction: TilingDirection,
   },
+  /// Moves the window into the tiling container in the given direction,
+  /// forming (or joining) a tabbed split container.
+  Stack {
+    #[clap(long)]
+    direction: Direction,
+  },
+  /// Toggles the layout of the window's parent split container between
+  /// tiled and tabbed.
+  ToggleTabbed,
+  /// Moves the window out of its tabbed split container, placing it next
+  /// to the container.
+  Unstack,
   WmCycleFocus {
     #[clap(long, default_value_t = false)]
     omit_floating: bool,
@@ -344,6 +360,15 @@ pub struct InvokeFocusCommand {
 
   #[clap(long)]
   pub recent_workspace: bool,
+
+  /// Focus the next tab of the closest tabbed ancestor (wraps around).
+  #[clap(long)]
+  pub next_tab: bool,
+
+  /// Focus the previous tab of the closest tabbed ancestor (wraps
+  /// around).
+  #[clap(long)]
+  pub prev_tab: bool,
 }
 
 #[derive(Args, Clone, Debug, PartialEq, Serialize)]

@@ -15,11 +15,13 @@ use wm_common::{
   AppCommand, AppMetadataData, BindingModesData, ClientResponseData,
   ClientResponseMessage, CommandData, EventSubscribeData,
   EventSubscriptionMessage, FocusedData, MonitorsData, QueryCommand,
-  ServerMessage, SubscribableEvent, TilingDirectionData, WindowsData,
+  ServerMessage, SubscribableEvent, TabbedContainersData,
+  TilingDirectionData, WindowsData,
   WmEvent, WorkspacesData, DEFAULT_IPC_PORT,
 };
 
 use crate::{
+  commands::general::displayed_tabbed_containers,
   traits::{CommonGetters, TilingDirectionGetters},
   user_config::UserConfig,
   wm::WindowManager,
@@ -242,6 +244,11 @@ impl IpcServer {
         QueryCommand::Paused => {
           ClientResponseData::Paused(wm.state.is_paused)
         }
+        QueryCommand::TabbedContainers => {
+          ClientResponseData::TabbedContainers(TabbedContainersData {
+            tabbed_containers: displayed_tabbed_containers(&wm.state)?,
+          })
+        }
       },
       AppCommand::Command {
         subject_container_id,
@@ -369,6 +376,12 @@ impl IpcServer {
       WmEvent::MonitorRemoved { .. } => SubscribableEvent::MonitorRemoved,
       WmEvent::TilingDirectionChanged { .. } => {
         SubscribableEvent::TilingDirectionChanged
+      }
+      WmEvent::TilingLayoutChanged { .. } => {
+        SubscribableEvent::TilingLayoutChanged
+      }
+      WmEvent::TabbedContainersChanged { .. } => {
+        SubscribableEvent::TabbedContainersChanged
       }
       WmEvent::UserConfigChanged { .. } => {
         SubscribableEvent::UserConfigChanged

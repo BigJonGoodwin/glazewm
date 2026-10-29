@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::{collections::HashMap, time::Instant};
 
 use anyhow::Context;
 use tokio::sync::mpsc::{self};
@@ -20,7 +20,7 @@ use crate::{
   },
   models::{
     Container, Monitor, NativeMonitorProperties, RootContainer,
-    WindowContainer, Workspace, WorkspaceTarget,
+    SplitContainer, WindowContainer, Workspace, WorkspaceTarget,
   },
   pending_sync::PendingSync,
   traits::{CommonGetters, PositionGetters, WindowGetters},
@@ -67,6 +67,16 @@ pub struct WmState {
   /// Whether the OS focused window is the same as the WM focused window.
   pub is_focus_synced: bool,
 
+  /// Active tab ID of each tabbed split container, as of the last
+  /// platform sync.
+  ///
+  /// Used to redraw tabbed containers whose active tab has changed.
+  pub active_tabs: HashMap<Uuid, Uuid>,
+
+  /// Serialized tabbed containers on displayed workspaces, as of the last
+  /// emitted `WmEvent::TabbedContainersChanged`.
+  pub tabbed_containers_snapshot: String,
+
   /// Whether the initial state has been populated.
   has_initialized: bool,
 
@@ -94,6 +104,8 @@ impl WmState {
       ignored_windows: Vec::new(),
       is_paused: false,
       is_focus_synced: false,
+      active_tabs: HashMap::new(),
+      tabbed_containers_snapshot: String::new(),
       has_initialized: false,
       event_tx,
       exit_tx,
@@ -540,6 +552,16 @@ impl WmState {
       .flat_map(CommonGetters::self_and_descendants)
       .filter(|container| !container.is_detached())
       .filter_map(|container| container.try_into().ok())
+      .collect()
+  }
+
+  /// Gets all split containers with a tabbed layout.
+  pub fn tabbed_containers(&self) -> Vec<SplitContainer> {
+    self
+      .root_container
+      .descendants()
+      .filter_map(|container| container.as_split().cloned())
+      .filter(SplitContainer::is_tabbed)
       .collect()
   }
 

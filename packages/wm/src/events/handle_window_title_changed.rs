@@ -3,8 +3,12 @@ use wm_common::{try_warn, WindowRuleEvent};
 use wm_platform::NativeWindow;
 
 use crate::{
-  commands::window::run_window_rules, traits::WindowGetters,
-  user_config::UserConfig, wm_state::WmState,
+  commands::{
+    general::emit_tabbed_containers_changed, window::run_window_rules,
+  },
+  traits::{CommonGetters, WindowGetters},
+  user_config::UserConfig,
+  wm_state::WmState,
 };
 
 pub fn handle_window_title_changed(
@@ -22,6 +26,13 @@ pub fn handle_window_title_changed(
     window.update_native_properties(|properties| {
       properties.title = title;
     });
+
+    // Tab titles are part of the tabbed containers event.
+    if window.ancestors().any(|ancestor| {
+      ancestor.as_split().is_some_and(|split| split.is_tabbed())
+    }) {
+      emit_tabbed_containers_changed(state)?;
+    }
 
     // Run window rules for title change events.
     run_window_rules(
